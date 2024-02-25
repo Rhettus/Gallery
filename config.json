@@ -6,7 +6,7 @@
   "sort-media-by": "filename",
   "download-photos": "copy",
   "cleanup": true,
-  "theme": "flow",
+  "theme": "classic",
   "css": "./custom.css",
   "footer": "Copyright - Siftu",
   "usage-stats": false
