@@ -16,7 +16,7 @@
     // reference: https://lukelowrey.com/css-variable-theme-switcher/
     
 
-    var storedTheme = localStorage.getItem('theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var storedTheme = localStorage.getItem('theme') || (window.matchMedia("(prefers-color-scheme: light)").matches ? "dark" : "light");
     if (storedTheme) {
         document.documentElement.setAttribute('data-theme', storedTheme)
     }
