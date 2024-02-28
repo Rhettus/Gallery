@@ -36,7 +36,6 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           folder: assets  # Replace with the path to your assets folder
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Delete artifact 🗑️
         uses: geekyeggo/delete-artifact@v2
         with:
