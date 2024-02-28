@@ -40,6 +40,8 @@ jobs:
     name: Publish extra assets to Github Pages
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
       - name: Deploy Assets to GitHub Pages
         uses: actions/deploy-pages@v3
         with:
