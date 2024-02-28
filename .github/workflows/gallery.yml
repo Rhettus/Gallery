@@ -38,6 +38,7 @@ jobs:
           name: gh-pages
   deploy2:
     name: Publish extra assets to Github Pages
+    runs-on: ubuntu-latest
     steps:
       - name: Deploy Assets to GitHub Pages
         uses: actions/deploy-pages@v3
