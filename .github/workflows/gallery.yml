@@ -22,17 +22,15 @@ jobs:
           persist-credentials: false
       - name: Build Gallery 🔧
         run: docker run -v "$(pwd):/work" ghcr.io/thumbsup/thumbsup /bin/sh -c "cd /work/ && npm install moment && thumbsup --config config.json"
-      - name: Package build
-        uses: actions/upload-artifact@v4
+      - name: Package and upload artifact 📦
+        uses: actions/upload-pages-artifact@v2
         with:
-          name: github-pages
-          path: |
-            'build_output'
-            assets/
+          path: 'build_output'
+          name: gh-pages
       - name: Deploy to Github Pages 🚀
         uses: actions/deploy-pages@v3
         with:
-          artifact_name: github-pages
+          artifact_name: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Delete artifact 🗑️
         uses: geekyeggo/delete-artifact@v2
