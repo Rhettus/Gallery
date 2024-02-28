@@ -37,6 +37,7 @@ jobs:
         with:
           folder: assets
           token: ${{ secrets.GITHUB_TOKEN }}
+          branch: master
       - name: Delete artifact 🗑️
         uses: geekyeggo/delete-artifact@v2
         with:
