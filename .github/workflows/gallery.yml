@@ -27,24 +27,26 @@ jobs:
         with:
           path: 'build_output'
           name: gh-pages
+      - name: Package and upload artifact assest 📦
+        uses: actions/upload-artifact@v4
+        with:
+          name: assets-artifact
+          path: assets/ # or path/to/artifact
       - name: Deploy to Github Pages 🚀
         uses: actions/deploy-pages@v3
         with:
           artifact_name: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy Assets to Github Pages 🚀
+        uses: actions/deploy-pages@v3
+        with:
+          artifact_name: assets-artifact
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Delete artifact 🗑️
         uses: geekyeggo/delete-artifact@v2
         with:
           name: gh-pages
-  deploy2:
-    name: Publish extra assets to Github Pages
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v3
-      - name: Deploy Assets to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Delete Assets artifact 🗑️
+        uses: geekyeggo/delete-artifact@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          folder: ./assets  # Replace with the path to your built website files
-          target-folder: assets
+          name: assets-artifact
