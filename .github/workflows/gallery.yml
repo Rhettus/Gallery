@@ -47,3 +47,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           folder: ./assets  # Replace with the path to your built website files
+          target-folder: assets
