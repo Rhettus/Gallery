@@ -46,4 +46,4 @@ jobs:
         uses: actions/deploy-pages@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          source: ./assets  # Replace with the path to your built website files
+          folder: ./assets  # Replace with the path to your built website files
