@@ -27,16 +27,16 @@ jobs:
         with:
           path: 'build_output'
           name: gh-pages
+      - name: Deploy to Github Pages 🚀
+        uses: actions/deploy-pages@v3
+        with:
+          artifact_name: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Package and upload assets 📦
         uses: actions/upload-pages-artifact@v2
         with:
           path: assets/
           name: gh-pages
-      - name: Package and upload artifact assest 📦
-        uses: actions/upload-artifact@v4
-        with:
-          name: assets-artifact
-          path: assets/ # or path/to/artifact
       - name: Deploy to Github Pages 🚀
         uses: actions/deploy-pages@v3
         with:
