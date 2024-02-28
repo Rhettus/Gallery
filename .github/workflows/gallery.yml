@@ -32,12 +32,15 @@ jobs:
         with:
           artifact_name: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Delete artifact 🗑️
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: gh-pages
+  deploy2:
+    name: Publish extra assets to Github Pages
+    steps:
       - name: Deploy Assets to GitHub Pages
         uses: actions/deploy-pages@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           source: ./assets  # Replace with the path to your built website files
-      - name: Delete artifact 🗑️
-        uses: geekyeggo/delete-artifact@v2
-        with:
-          name: gh-pages
