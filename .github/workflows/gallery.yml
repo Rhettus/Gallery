@@ -33,11 +33,10 @@ jobs:
           artifact_name: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy Assets to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@3.7.1
-        with:
-          folder: assets
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: master
+        uses: actions/upload-artifact@v4
+          with:
+            name: assets
+            path: assets/ # or path/to/artifact
       - name: Delete artifact 🗑️
         uses: geekyeggo/delete-artifact@v2
         with:
