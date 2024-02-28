@@ -34,9 +34,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy Assets to GitHub Pages
         uses: actions/upload-artifact@v4
-          with:
-            name: assets
-            path: assets/ # or path/to/artifact
+        with:
+          name: assets
+          path: assets/ 
       - name: Delete artifact 🗑️
         uses: geekyeggo/delete-artifact@v2
         with:
