@@ -34,16 +34,6 @@ jobs:
         with:
           artifact_name: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Package and upload assets 📦
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: assets/
-          name: gh-pages
-      - name: Deploy to Github Pages 🚀
-        uses: actions/deploy-pages@v3
-        with:
-          artifact_name: gh-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Delete artifact 🗑️
         uses: geekyeggo/delete-artifact@v2
         with:
