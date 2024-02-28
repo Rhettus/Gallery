@@ -25,14 +25,14 @@ jobs:
       - name: Package build
         uses: actions/upload-artifact@v4
         with:
-          name: gh-pages
+          name: github-pages
           path: |
+            'build_output'
             assets/
-            work/
       - name: Deploy to Github Pages 🚀
         uses: actions/deploy-pages@v3
         with:
-          artifact_name: gh-pages
+          artifact_name: github-pages
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Delete artifact 🗑️
         uses: geekyeggo/delete-artifact@v2
