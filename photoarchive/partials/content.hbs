@@ -1,0 +1,120 @@
+<div id="container">
+
+  <div class="layout">
+    <div id="side">
+
+      {{~#if album.home~}}
+
+        <div class="top">
+          <!-- Title -->
+          <header>
+            <h1 class="site-heading"><a href="{{relative gallery.home.url}}">{{gallery.title}}</a></h1>
+            <p class="barcode">{{gallery.title}}</p>
+          </header>
+        </div>
+
+        <div class="bottom">
+
+          <div class="control-bar">
+            {{> dark-light-toggle}} {{> BW-toggle}}
+          </div>
+
+          <hr class="hr-half">
+
+          <div class="website-info">
+                <section class="contact">
+                <h3 class="contact-title">Contact me</h3>
+                <ul>
+                    <li class="github"><a href="http://github.com/Rhettus" target="_blank"><i class="fa fa-github"></i></a></li>
+                    <li class="linkedin"><a href="https://in.linkedin.com/in/rhett-hillary-30232b4" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+                    <li class="flickr"><a href="https://flickr.com/photos/siftu" target="_blank"><i class="fa fa-flickr"></i></a></li>
+                </ul>
+              </section>
+            <!-- <p>Template by <a href="https://github.com/chaosarium">chaosarium</a>, avaiable on <a href="https://github.com/chaosarium/PhotoArchive">GitHub</a>.</p> -->
+          </div>
+          <hr class="hr-half">
+          <p>A curated collection of albums, thoughtfully arranged to evoke emotions and memories</p>
+        </div>
+
+      {{~else~}}
+
+        <div class="top">
+          <!-- Album breadcrumbs -->
+          <nav class="breadcrumbs">
+            {{#each breadcrumbs~}}
+            <a class="breadcrumb-item" href="{{relative url}}">{{title}}</a>&nbsp;/&nbsp;
+            {{~/each~}}
+            <a class="breadcrumb-item" href="{{relative album.url}}">{{album.title}}</a>
+          </nav>
+          <div class="control-bar">
+            {{> dark-light-toggle}} {{> BW-toggle}}
+          </div>
+        </div>
+
+        <div class="bottom">
+          <h1 class="album-heading">{{album.title}}</h1>
+          <h1 class="barcode">{{album.title}}</h1>
+          <p class="date-range">{{date album.stats.fromDate}} - {{date album.stats.toDate}}</p>
+          {{#if album.zip}}
+          <div class="zip">
+            <p>Download album as <a href="{{album.zip}}">zip</a>.</p>
+          </div>
+          {{/if}}
+        </div>
+
+      {{~/if~}}
+
+    </div>
+    <div id="content">
+
+      <!-- Subalbums -->
+      {{#if album.albums}}
+        <div id="albums">
+          {{#each album.albums~}}
+            {{> subalbum}}
+          {{~/each}}
+        </div>
+      {{/if}}
+
+      <!-- divider -->
+      {{#if album.files}}{{#if album.albums}}
+      <hr>
+      {{/if}}{{/if}}
+
+      <!-- Gallery -->
+      {{#if album.files}}
+      <div id="gallery">
+        {{#each album.files~}}
+          {{> thumbnail}}
+        {{~/each}}
+      </div>
+      {{/if}}
+
+      
+      {{#if gallery.footer}}
+      <hr>
+        <footer>
+          <p>{{{gallery.footer}}}</p>
+        </footer>
+      {{/if}}
+
+    </div>
+  </div>
+
+  <!-- TODO Pagination -->
+  {{#compare pagination.length '>' 1}}
+  <div>
+    <nav class="pagination">
+      Pages:
+      {{#each pagination}}
+      {{#if current}}
+      <a class="page current" href="{{relative url}}">{{index}}</a>
+      {{else}}
+      <a class="page" href="{{relative url}}">{{index}}</a>
+      {{/if}}
+      {{/each}}
+    </nav>
+  </div>
+  {{/compare}}
+
+</div>
