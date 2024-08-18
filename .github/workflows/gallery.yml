@@ -21,7 +21,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Build Gallery 🔧
-        run: docker run -v "$(pwd):/work" ghcr.io/thumbsup/thumbsup /bin/sh -c "cd /work/ && npm install moment && thumbsup --config config.json && cp -pr /work/assets /work/build_output"
+        run: docker run -v "$(pwd):/work" ghcr.io/thumbsup/thumbsup /bin/sh -c "cd /work/ && npm install moment && thumbsup --config config.json --embed-exif && cp -pr /work/assets /work/build_output"
       - name: Package and upload artifact 📦
         uses: actions/upload-pages-artifact@v2
         with:
