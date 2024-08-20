@@ -9,5 +9,6 @@
   "theme-path": "photoarchive",
   "css": "./custom.css",
   "footer": "© Rhett Hillary",
+  "embed-exif": true,
   "usage-stats": false
 }
