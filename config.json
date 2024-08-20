@@ -8,7 +8,5 @@
   "cleanup": true,
   "theme-path": "photoarchive",
   "css": "./custom.css",
-  "footer": "© Rhett Hillary",
-  "preserveExif": true,
-  "usage-stats": false
+  "footer": "© Rhett Hillary"
 }
