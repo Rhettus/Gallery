@@ -1,12 +1,12 @@
 {
   "input": "./gallery",
   "output": "./build_output",
-  "title": "Siftu's Snaps",
+  "title": "Rhett.photo",
   "sort-albums-by": "title",
   "sort-media-by": "date",
   "download-photos": "copy",
   "cleanup": true,
   "theme-path": "photoarchive",
   "css": "./custom.css",
-  "footer": "© Rhett Hillary"
+  "footer": "©Rhett Hillary"
 }
