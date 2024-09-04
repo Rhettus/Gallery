@@ -22,7 +22,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Build Gallery 🔧
-        run: 
+        run: |
           docker login --username rhettus --password ${{ secrets.GH_PAT }} ghcr.io
           docker run -v "$(pwd):/work" ghcr.io/rhettus/rhettus_website /bin/sh -c "cd /work/ && thumbsup --config config.json && cp -pr /work/assets /work/build_output"
       - name: Package and upload artifact 📦
