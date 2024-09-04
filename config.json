@@ -1,6 +1,6 @@
 {
-  "input": "./gallery",
-  "output": "./build_output",
+  "input": "/work/gallery",
+  "output": "/work/build_output",
   "title": "Rhett.photo",
   "sort-albums-by": "title",
   "sort-media-by": "date",
