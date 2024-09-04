@@ -26,7 +26,7 @@ jobs:
       - name: Build Gallery 🔧
         run: |
           docker login --username rhettus --password ${{ secrets.GH_PAT }} ghcr.io
-          docker run -v "$(pwd):/work" ghcr.io/rhettus/thumbsup_website /bin/sh -c "cd /thumbsup && npm install moment && thumbsup --config /work/config.json && cp -pr /work/assets /work/build_output"
+          docker run -v "$(pwd):/work" ghcr.io/rhettus/thumbsup_website /bin/sh -c "cd /work && npm install moment && thumbsup --config /work/config.json && cp -pr /work/assets /work/build_output"
       - name: Package and upload artifact 📦
         uses: actions/upload-pages-artifact@v2
         with:
