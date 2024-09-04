@@ -16,6 +16,8 @@ jobs:
     name: Publish Gallery to Github Pages
     if: ${{ github.repository != 'gautamkrishnar/github-pages-gallery' && github.event.head_commit.message != '' && github.event.head_commit.message != 'Initial commit' }}
     runs-on: ubuntu-latest
+    env:
+      NODE_PATH: /thumbsup/node_modules
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
