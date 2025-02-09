@@ -27,6 +27,13 @@ jobs:
         run: |
           docker login --username rhettus --password ${{ secrets.GH_PAT }} ghcr.io
           docker run -v "$(pwd):/work" ghcr.io/rhettus/thumbsup_website /bin/sh -c "cd /work && npm install moment && thumbsup --config /work/config.json && cp -pr /work/assets /work/build_output"
+      - name: Debug: Check for symlinks and hard links
+        run: |
+          echo "Checking for symlinks in build_output..."
+          find build_output -type l -exec ls -l {} \;
+          
+          echo "Checking for hard links in build_output..."
+          find build_output -type f -links +1 -exec ls -l {} \;    
       - name: Package and upload artifact 📦
         uses: actions/upload-artifact@v4
         with:
