@@ -40,8 +40,6 @@ jobs:
           name: github-pages  # ⚠️ GitHub Pages now requires this artifact name
           path: build_output
           retention-days: 1  # Ensures cleanup after deployment
-      - name: Deploy to Github Pages 🚀
+      - name: Deploy to GitHub Pages 🚀
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: github-pages  # ⚠️ Must match upload name exactly
 
