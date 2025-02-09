@@ -30,14 +30,11 @@ jobs:
       - name: Package and upload artifact 📦
         uses: actions/upload-artifact@v4
         with:
-          name: gh-pages
+          name: github-pages  # ⚠️ GitHub Pages now requires this artifact name
           path: build_output
+          retention-days: 1  # Ensures cleanup after deployment
       - name: Deploy to Github Pages 🚀
         uses: actions/deploy-pages@v3
         with:
-          artifact_name: gh-pages
+          artifact_name: github-pages  # ⚠️ Must match upload name exactly
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Delete artifact 🗑️
-        uses: geekyeggo/delete-artifact@v2
-        with:
-          name: gh-pages
