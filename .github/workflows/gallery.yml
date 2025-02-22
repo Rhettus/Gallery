@@ -35,7 +35,7 @@ jobs:
           echo "Checking for hard links in build_output..."
           find build_output -type f -links +1 -exec ls -l {} \;    
       - name: Package and upload artifact 📦
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages  # ⚠️ GitHub Pages now requires this artifact name
           path: build_output
@@ -44,4 +44,5 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           artifact_name: github-pages  # ⚠️ Must match upload name exactly
+          token: ${{ secrets.GITHUB_TOKEN }}
 
