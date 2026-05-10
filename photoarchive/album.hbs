@@ -179,40 +179,33 @@
         }
       }
 
-      // Inject the info button into the lightgallery toolbar after it opens
+
+      // Inject button using lgInit (fires once on initialization)
+      document.getElementById('gallery').addEventListener('lgInit', function() {
+        var closeBtn = document.querySelector('.lg-toolbar .lg-close');
+        if (closeBtn && !document.getElementById('lg-exif-btn')) {
+          var btn = document.createElement('button');
+          btn.id = 'lg-exif-btn';
+          btn.className = 'lg-exif-btn lg-icon';
+          btn.title = 'Photo info';
+          btn.innerHTML = '&#x24D8;';
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleExifPanel();
+          });
+          closeBtn.parentNode.insertBefore(btn, closeBtn);
+        }
+      });
+
+      // Move panel and load EXIF after gallery opens
       document.getElementById('gallery').addEventListener('lgAfterOpen', function() {
-        // Move panel inside the lg-outer container so it overlays correctly
         var lgOuter = document.querySelector('.lg-outer');
         if (lgOuter && !lgOuter.contains(exifPanel)) {
           lgOuter.appendChild(exifPanel);
         }
-
-        // Add button to toolbar if not already there
-        if (!document.getElementById('lg-exif-btn')) {
-          var toolbar = document.querySelector('.lg-toolbar');
-          if (toolbar) {
-            var btn = document.createElement('button');
-            btn.id = 'lg-exif-btn';
-            btn.className = 'lg-exif-btn';
-            btn.title = 'Photo info';
-            btn.innerHTML = '&#x24D8;';
-            // Insert just before the close button on the right side of toolbar
-            var closeBtn = document.querySelector('.lg-toolbar .lg-close');
-            if (closeBtn && closeBtn.parentNode) {
-              closeBtn.parentNode.insertBefore(btn, closeBtn);
-            } else if (toolbar) {
-              toolbar.appendChild(btn);
-            }
-            btn.addEventListener('click', function(e) {
-              e.stopPropagation();
-              toggleExifPanel();
-            });
-          }
-        }
-
-        // Load EXIF for the first slide
         updateExifPanel(0);
       });
+
 
       // Update EXIF panel when slide changes
       document.getElementById('gallery').addEventListener('lgAfterSlide', function(e) {
