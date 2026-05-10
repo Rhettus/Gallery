@@ -30,9 +30,13 @@
           padding: 0;
           transition: opacity 0.2s;
           line-height: 1;
-          vertical-align: middle;
+          /* Place between zoom (order 2) and close (order 3) in the toolbar flex row */
+          order: 2;
         }
         .lg-exif-btn:hover { opacity: 1; }
+        /* Ensure zoom and close have explicit orders so our button slots between them */
+        .lg-toolbar .lg-zoom-in { order: 1; }
+        .lg-toolbar .lg-close   { order: 3; }
 
         #lg-exif-panel {
           display: none;
@@ -180,10 +184,16 @@
       }
 
 
-      // Inject button using lgInit (fires once on initialization)
-      document.getElementById('gallery').addEventListener('lgInit', function() {
-        var closeBtn = document.querySelector('.lg-toolbar .lg-close');
-        if (closeBtn && !document.getElementById('lg-exif-btn')) {
+      // Inject button and panel on lgAfterOpen
+      document.getElementById('gallery').addEventListener('lgAfterOpen', function() {
+        // Move panel inside lg-outer so it overlays correctly
+        var lgOuter = document.querySelector('.lg-outer');
+        if (lgOuter && !lgOuter.contains(exifPanel)) {
+          lgOuter.appendChild(exifPanel);
+        }
+
+        // Add button to toolbar if not already there
+        if (!document.getElementById('lg-exif-btn')) {
           var btn = document.createElement('button');
           btn.id = 'lg-exif-btn';
           btn.className = 'lg-exif-btn lg-icon';
@@ -193,18 +203,19 @@
             e.stopPropagation();
             toggleExifPanel();
           });
-          closeBtn.parentNode.insertBefore(btn, closeBtn);
+          // Append to toolbar — CSS order puts it right of zoom, left of close
+          var toolbar = document.querySelector('.lg-toolbar');
+          var closeBtn = toolbar && toolbar.querySelector('.lg-close');
+          if (closeBtn) {
+            toolbar.insertBefore(btn, closeBtn);
+          } else if (toolbar) {
+            toolbar.appendChild(btn);
+          }
         }
-      });
 
-      // Move panel and load EXIF after gallery opens
-      document.getElementById('gallery').addEventListener('lgAfterOpen', function() {
-        var lgOuter = document.querySelector('.lg-outer');
-        if (lgOuter && !lgOuter.contains(exifPanel)) {
-          lgOuter.appendChild(exifPanel);
-        }
         updateExifPanel(0);
       });
+
 
 
       // Update EXIF panel when slide changes
