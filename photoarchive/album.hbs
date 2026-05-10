@@ -22,16 +22,14 @@
           width: 40px;
           height: 47px;
           cursor: pointer;
-          opacity: 0.8;
-          font-size: 18px;
+          opacity: 0.75;
+          font-size: 22px;
           color: #fff;
           background: none;
           border: none;
           padding: 0;
-          font-family: Georgia, serif;
-          font-style: italic;
-          font-weight: bold;
           transition: opacity 0.2s;
+          line-height: 1;
         }
         .lg-exif-btn:hover { opacity: 1; }
 
@@ -196,10 +194,10 @@
             btn.id = 'lg-exif-btn';
             btn.className = 'lg-exif-btn';
             btn.title = 'Photo info';
-            btn.innerHTML = 'i';
-            // Insert before the close button
-            var closeBtn = toolbar.querySelector('.lg-close');
-            toolbar.insertBefore(btn, closeBtn);
+            btn.innerHTML = '&#x24D8;';
+            // Insert before the zoom button
+            var zoomBtn = toolbar.querySelector('.lg-zoom-in');
+            toolbar.insertBefore(btn, zoomBtn);
             btn.addEventListener('click', function(e) {
               e.stopPropagation();
               toggleExifPanel();
