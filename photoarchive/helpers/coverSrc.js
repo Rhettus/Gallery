@@ -1,35 +1,44 @@
 /*
   Returns a relative small thumbnail URL for the album cover.
-  Scans the previews array for a file named "cover.*" (any extension).
-  Falls back to the first preview (same as previews.0.urls.small) if none found.
+  Looks for a file named "cover.*" in the full album files list first,
+  then falls back to scanning previews, then previews[0].
 
-  Automatically applies the correct relative path prefix using album.depth
-  from the template root context (available in options.data.root), so no
-  subexpression is needed — just use it directly:
-
-    <img src="{{coverSrc previews}}">
-
-  The Handlebars options hash is always passed as the final argument automatically.
+  Usage: {{coverSrc previews}}
 */
 module.exports = function (previews, options) {
-  if (!Array.isArray(previews) || previews.length === 0) return ''
+  var root = options && options.data && options.data.root
+  var albumFiles = (root && root.album && root.album.files) || []
+  var depth = (root && root.album && root.album.depth) || 0
 
-  const cover = previews.find(function (p) {
-    return p.filename &&
-      p.filename.replace(/\.[^.]+$/, '').toLowerCase() === 'cover'
-  })
-
-  const rawUrl = cover ? cover.urls.small : previews[0].urls.small
-
-  // Replicate thumbsup's built-in `relative` helper:
-  // prefix the URL with '../' repeated for each level of album depth.
-  var depth = 0
-  if (options && options.data && options.data.root &&
-      options.data.root.album) {
-    depth = options.data.root.album.depth || 0
+  function isCoverFile (f) {
+    return f && f.filename &&
+      f.filename.replace(/\.[^.]+$/, '').toLowerCase() === 'cover'
   }
-  var prefix = ''
-  for (var i = 0; i < depth; i++) prefix += '../'
-  return prefix + rawUrl
-}
 
+  function makeRelative (url) {
+    var prefix = ''
+    for (var i = 0; i < depth; i++) prefix += '../'
+    return prefix + url
+  }
+
+  // 1. Check full files list (cover.jpg may not be in the previews subset)
+  var coverInFiles = albumFiles.find(isCoverFile)
+  if (coverInFiles && coverInFiles.urls && coverInFiles.urls.small) {
+    return makeRelative(coverInFiles.urls.small)
+  }
+
+  // 2. Check previews subset
+  if (Array.isArray(previews)) {
+    var coverInPreviews = previews.find(isCoverFile)
+    if (coverInPreviews && coverInPreviews.urls && coverInPreviews.urls.small) {
+      return makeRelative(coverInPreviews.urls.small)
+    }
+
+    // 3. Fall back to first preview
+    if (previews.length > 0 && previews[0].urls && previews[0].urls.small) {
+      return makeRelative(previews[0].urls.small)
+    }
+  }
+
+  return ''
+}
