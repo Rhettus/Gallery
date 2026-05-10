@@ -16,27 +16,27 @@
       <style>
         /* EXIF info panel */
         .lg-exif-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
+          /* Match lightgallery's native .lg-icon sizing exactly */
           width: 50px;
           height: 47px;
           cursor: pointer;
-          opacity: 0.75;
-          font-size: 20px;
+          opacity: 0.5;
+          font-size: 25px;
+          font-weight: 300;
           color: #fff;
           background: none;
           border: none;
           padding: 0;
           transition: opacity 0.2s;
-          line-height: 1;
-          /* Place between zoom (order 2) and close (order 3) in the toolbar flex row */
+          line-height: 47px;
+          text-align: center;
+          display: inline-block;
+          /* Slot between zoom and close */
           order: 2;
         }
         .lg-exif-btn:hover { opacity: 1; }
-        /* Ensure zoom and close have explicit orders so our button slots between them */
         .lg-toolbar .lg-zoom-in { order: 1; }
-        .lg-toolbar .lg-close   { order: 3; }
+        .lg-toolbar .lg-close   { order: 4; }
 
         #lg-exif-panel {
           display: none;
