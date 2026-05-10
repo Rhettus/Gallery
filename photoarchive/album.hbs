@@ -32,11 +32,13 @@
           text-align: center;
           display: inline-block;
           /* Slot between zoom and close */
-          order: 2;
+          order: 11;
         }
         .lg-exif-btn:hover { opacity: 1; }
-        .lg-toolbar .lg-zoom-in { order: 1; }
-        .lg-toolbar .lg-close   { order: 4; }
+        /* Force explicit flex order for all right-side toolbar buttons */
+        .lg-toolbar .lg-zoom-in  { order: 10; }
+        .lg-toolbar #lg-exif-btn { order: 11; }
+        .lg-toolbar .lg-close    { order: 12; }
 
         #lg-exif-panel {
           display: none;
