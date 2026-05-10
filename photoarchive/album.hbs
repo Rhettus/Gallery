@@ -106,12 +106,23 @@
       var exifPanelVisible = false;
       var exifPanel = document.getElementById('lg-exif-panel');
 
-      // Format shutter speed as a fraction if slower than 1s
+      // Format shutter speed - handles decimals and rational strings like "1/1000"
       function formatShutter(val) {
         if (!val) return null;
+        if (typeof val === 'string' && val.indexOf('/') !== -1) {
+          var parts = val.split('/');
+          var num = parseFloat(parts[0]);
+          var den = parseFloat(parts[1]);
+          if (!isNaN(num) && !isNaN(den) && den !== 0) {
+            var s = num / den;
+            if (s >= 1) return Math.round(s) + 's';
+            return '1/' + Math.round(1 / s) + 's';
+          }
+          return val;
+        }
         var n = parseFloat(val);
         if (isNaN(n)) return val;
-        if (n >= 1) return n + 's';
+        if (n >= 1) return Math.round(n) + 's';
         return '1/' + Math.round(1 / n) + 's';
       }
 
@@ -143,12 +154,12 @@
         }
 
         var rows = [
-          ['Camera',    camera],
-          ['Lens',      d.lens || null],
-          ['Aperture',  formatAperture(d.fnumber)],
-          ['Shutter',   formatShutter(d.exposuretime)],
-          ['ISO',       d.isospeedratings ? 'ISO ' + d.isospeedratings : null],
-          ['Focal',     formatFocal(d.focallength)],
+          ['Camera',        camera],
+          ['Lens',          d.lens || d.lensmodel || null],
+          ['Aperture',      formatAperture(d.fnumber)],
+          ['Shutter',       formatShutter(d.exposuretime)],
+          ['ISO',           d.isospeedratings ? 'ISO ' + d.isospeedratings : null],
+          ['Focal Length',  formatFocal(d.focallength)],
         ].filter(function(r) { return r[1]; });
 
         if (rows.length === 0) {
