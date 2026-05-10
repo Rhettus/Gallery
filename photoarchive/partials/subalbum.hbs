@@ -1,6 +1,8 @@
 <div class="album">
     <a href="{{relative url}}">
-        <img class="album-cover" src="{{relative (albumCover files previews)}}" alt="{{title}}">
+        {{#albumCover files previews as |coverUrl|}}
+        <img class="album-cover" src="{{relative coverUrl}}" alt="{{title}}">
+        {{/albumCover}}
 
         <div class="album-info">
             <div class="album-title">{{title}} <span class="album-count">({{stats.photos}})</span></div>
