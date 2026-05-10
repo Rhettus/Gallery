@@ -13,12 +13,64 @@
 
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/justifiedGallery/3.8.1/css/justifiedGallery.min.css" integrity="sha512-CRFv/YVJyElHXTiMgnhWKd2f04Hd/BUJkwcyqYmlpL1ugSYW23nNRazLk960mlz7dugTrETCGGjcsnspPOS6qA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+      <style>
+        /* EXIF info panel */
+        .lg-exif-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 47px;
+          cursor: pointer;
+          opacity: 0.8;
+          font-size: 18px;
+          color: #fff;
+          background: none;
+          border: none;
+          padding: 0;
+          font-family: Georgia, serif;
+          font-style: italic;
+          font-weight: bold;
+          transition: opacity 0.2s;
+        }
+        .lg-exif-btn:hover { opacity: 1; }
+
+        #lg-exif-panel {
+          display: none;
+          position: absolute;
+          bottom: 80px;
+          right: 16px;
+          background: rgba(0, 0, 0, 0.75);
+          color: #fff;
+          border-radius: 8px;
+          padding: 14px 18px;
+          font-size: 13px;
+          line-height: 1.8;
+          z-index: 10000;
+          min-width: 220px;
+          backdrop-filter: blur(6px);
+          pointer-events: none;
+        }
+        #lg-exif-panel.visible { display: block; }
+        #lg-exif-panel table { border-collapse: collapse; width: 100%; }
+        #lg-exif-panel td { padding: 1px 0; vertical-align: top; }
+        #lg-exif-panel td:first-child {
+          color: #aaa;
+          padding-right: 12px;
+          white-space: nowrap;
+        }
+        #lg-exif-panel .no-exif { color: #aaa; font-style: italic; }
+      </style>
+
   </head>
 
   <body>
 
     {{> content}}
     {{> video-loader}}
+
+    <!-- EXIF panel (injected into lightgallery outer container) -->
+    <div id="lg-exif-panel"></div>
 
     <!-- jquery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -29,15 +81,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/zoom/lg-zoom.min.js" integrity="sha512-BLW2Jrofiqm6m7JhkQDIh2olT0EBI58+hIL/AXWvo8gOXKmsNlU6myJyEkTy6rOAAZjn0032FRk8sl9RgXPYIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/thumbnail/lg-thumbnail.min.js" integrity="sha512-VBbe8aA3uiK90EUKJnZ4iEs0lKXRhzaAXL8CIHWYReUwULzxkOSxlNixn41OLdX0R1KNP23/s76YPyeRhE6P+Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script type="text/javascript">
-      lightGallery(document.getElementById('gallery'), {
+      var lgInstance = lightGallery(document.getElementById('gallery'), {
         speed: 400,
         loop : false,
         controls: true,
         counter: true,
         download: false,
-        appendSubHtmlTo: ".lg-sub-html", 
+        appendSubHtmlTo: ".lg-sub-html",
         licenseKey: "GNU GPL license v3", // not for commercial use!
-        
+
         thumbnail: true,
         toggleThumb: true,
         animateThumb: true,
@@ -48,7 +100,118 @@
 
         plugins: [lgZoom, lgThumbnail]
       });
-      console.log("started lightgallery")
+
+      // ── EXIF info panel ──────────────────────────────────────────────────────
+
+      var exifPanelVisible = false;
+      var exifPanel = document.getElementById('lg-exif-panel');
+
+      // Format shutter speed as a fraction if slower than 1s
+      function formatShutter(val) {
+        if (!val) return null;
+        var n = parseFloat(val);
+        if (isNaN(n)) return val;
+        if (n >= 1) return n + 's';
+        return '1/' + Math.round(1 / n) + 's';
+      }
+
+      // Format aperture as f/x.x
+      function formatAperture(val) {
+        if (!val) return null;
+        return 'f/' + parseFloat(val).toFixed(1).replace(/\.0$/, '');
+      }
+
+      // Format focal length
+      function formatFocal(val) {
+        if (!val) return null;
+        return parseFloat(val).toFixed(0) + 'mm';
+      }
+
+      // Build and show/hide the EXIF panel for the current slide
+      function updateExifPanel(index) {
+        var items = document.querySelectorAll('#gallery > a');
+        var el = items[index];
+        if (!el) { exifPanel.innerHTML = ''; return; }
+
+        var d = el.dataset;
+        var make  = d.make  || '';
+        var model = d.model || '';
+        var camera = [make, model].filter(Boolean).join(' ') || null;
+        // Strip make prefix from model if it's already in there
+        if (make && model && model.toLowerCase().startsWith(make.toLowerCase())) {
+          camera = model;
+        }
+
+        var rows = [
+          ['Camera',    camera],
+          ['Lens',      d.lens || null],
+          ['Aperture',  formatAperture(d.fnumber)],
+          ['Shutter',   formatShutter(d.exposuretime)],
+          ['ISO',       d.isospeedratings ? 'ISO ' + d.isospeedratings : null],
+          ['Focal',     formatFocal(d.focallength)],
+        ].filter(function(r) { return r[1]; });
+
+        if (rows.length === 0) {
+          exifPanel.innerHTML = '<span class="no-exif">No EXIF data</span>';
+        } else {
+          exifPanel.innerHTML = '<table>' + rows.map(function(r) {
+            return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
+          }).join('') + '</table>';
+        }
+      }
+
+      function toggleExifPanel() {
+        exifPanelVisible = !exifPanelVisible;
+        if (exifPanelVisible) {
+          exifPanel.classList.add('visible');
+        } else {
+          exifPanel.classList.remove('visible');
+        }
+      }
+
+      // Inject the info button into the lightgallery toolbar after it opens
+      document.getElementById('gallery').addEventListener('lgAfterOpen', function() {
+        // Move panel inside the lg-outer container so it overlays correctly
+        var lgOuter = document.querySelector('.lg-outer');
+        if (lgOuter && !lgOuter.contains(exifPanel)) {
+          lgOuter.appendChild(exifPanel);
+        }
+
+        // Add button to toolbar if not already there
+        if (!document.getElementById('lg-exif-btn')) {
+          var toolbar = document.querySelector('.lg-toolbar');
+          if (toolbar) {
+            var btn = document.createElement('button');
+            btn.id = 'lg-exif-btn';
+            btn.className = 'lg-exif-btn';
+            btn.title = 'Photo info';
+            btn.innerHTML = 'i';
+            // Insert before the close button
+            var closeBtn = toolbar.querySelector('.lg-close');
+            toolbar.insertBefore(btn, closeBtn);
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              toggleExifPanel();
+            });
+          }
+        }
+
+        // Load EXIF for the first slide
+        updateExifPanel(0);
+      });
+
+      // Update EXIF panel when slide changes
+      document.getElementById('gallery').addEventListener('lgAfterSlide', function(e) {
+        updateExifPanel(e.detail.index);
+        // Keep panel visible but refresh content on slide change
+      });
+
+      // Hide panel when lightgallery closes
+      document.getElementById('gallery').addEventListener('lgBeforeClose', function() {
+        exifPanelVisible = false;
+        exifPanel.classList.remove('visible');
+      });
+
     </script>
 
     <!-- Justified gallery -->
