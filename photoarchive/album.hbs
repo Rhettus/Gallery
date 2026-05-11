@@ -14,14 +14,14 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/justifiedGallery/3.8.1/css/justifiedGallery.min.css" integrity="sha512-CRFv/YVJyElHXTiMgnhWKd2f04Hd/BUJkwcyqYmlpL1ugSYW23nNRazLk960mlz7dugTrETCGGjcsnspPOS6qA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
       <style>
-        /* EXIF info panel */
-        .lg-exif-btn {
-          /* Match lightgallery's native .lg-icon sizing exactly */
+        /* ── Shared toolbar button style ─────────────────────────── */
+        .lg-exif-btn,
+        .lg-slideshow-btn {
           width: 50px;
           height: 47px;
           cursor: pointer;
           opacity: 0.5;
-          font-size: 25px;
+          font-size: 22px;
           font-weight: 300;
           color: #fff;
           background: none;
@@ -31,15 +31,18 @@
           line-height: 47px;
           text-align: center;
           display: inline-block;
-          /* Slot between zoom and close */
-          order: 11;
         }
-        .lg-exif-btn:hover { opacity: 1; }
-        /* Force explicit flex order for all right-side toolbar buttons */
-        .lg-toolbar .lg-zoom-in  { order: 10; }
-        .lg-toolbar #lg-exif-btn { order: 11; }
-        .lg-toolbar .lg-close    { order: 12; }
+        .lg-exif-btn:hover,
+        .lg-slideshow-btn:hover { opacity: 1; }
+        .lg-slideshow-btn.playing { opacity: 1; }
 
+        /* Toolbar flex order: zoom=10, slideshow=11, info=12, close=13 */
+        .lg-toolbar .lg-zoom-in       { order: 10; }
+        .lg-toolbar #lg-slideshow-btn { order: 11; }
+        .lg-toolbar #lg-exif-btn      { order: 12; }
+        .lg-toolbar .lg-close         { order: 13; }
+
+        /* ── EXIF panel ───────────────────────────────────────────── */
         #lg-exif-panel {
           display: none;
           position: absolute;
@@ -65,6 +68,36 @@
           white-space: nowrap;
         }
         #lg-exif-panel .no-exif { color: #aaa; font-style: italic; }
+
+        /* ── Play button on thumbnail grid ───────────────────────── */
+        #slideshow-launch {
+          position: fixed;
+          bottom: 32px;
+          right: 32px;
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 24px;
+          background: rgba(0, 0, 0, 0.7);
+          color: #fff;
+          border: 1px solid rgba(255,255,255,0.25);
+          border-radius: 32px;
+          font-size: 14px;
+          font-family: inherit;
+          cursor: pointer;
+          backdrop-filter: blur(8px);
+          transition: background 0.2s, border-color 0.2s;
+          letter-spacing: 0.04em;
+        }
+        #slideshow-launch:hover {
+          background: rgba(0,0,0,0.9);
+          border-color: rgba(255,255,255,0.5);
+        }
+        #slideshow-launch .play-icon {
+          font-size: 16px;
+          line-height: 1;
+        }
       </style>
 
   </head>
@@ -74,26 +107,33 @@
     {{> content}}
     {{> video-loader}}
 
-    <!-- EXIF panel (injected into lightgallery outer container) -->
+    <!-- EXIF panel -->
     <div id="lg-exif-panel"></div>
+
+    <!-- Slideshow launch button on thumbnail grid -->
+    <button id="slideshow-launch" title="Start slideshow">
+      <span class="play-icon">▶</span> Slideshow
+    </button>
 
     <!-- jquery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
 
     <!-- LightGallery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/lightgallery.min.js" integrity="sha512-jEJ0OA9fwz5wUn6rVfGhAXiiCSGrjYCwtQRUwI/wRGEuWRZxrnxoeDoNc+Pnhx8qwKVHs2BRQrVR9RE6T4UHBg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/zoom/lg-zoom.min.js" integrity="sha512-BLW2Jrofiqm6m7JhkQDIh2olT0EBI58+hIL/AXWvo8gOXKmsNlU6myJyEkTy6rOAAZjn0032FRk8sl9RgXPYIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/thumbnail/lg-thumbnail.min.js" integrity="sha512-VBbe8aA3uiK90EUKJnZ4iEs0lKXRhzaAXL8CIHWYReUwULzxkOSxlNixn41OLdX0R1KNP23/s76YPyeRhE6P+Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script type="text/javascript">
+
+      var SLIDESHOW_DELAY = 10000; // 10 seconds between slides
+
       var lgInstance = lightGallery(document.getElementById('gallery'), {
-        speed: 400,
-        loop : false,
+        speed: 1200,
+        loop: true,
         controls: true,
         counter: true,
         download: false,
         appendSubHtmlTo: ".lg-sub-html",
-        licenseKey: "GNU GPL license v3", // not for commercial use!
+        licenseKey: "GNU GPL license v3",
 
         thumbnail: true,
         toggleThumb: true,
@@ -106,12 +146,51 @@
         plugins: [lgZoom, lgThumbnail]
       });
 
-      // ── EXIF info panel ──────────────────────────────────────────────────────
+      // ── Slideshow state ──────────────────────────────────────────────────────
+
+      var slideshowTimer = null;
+      var slideshowPlaying = false;
+      var slideshowBtn = null;
+
+      function startSlideshow() {
+        if (slideshowTimer) return;
+        slideshowPlaying = true;
+        slideshowTimer = setInterval(function() {
+          lgInstance.goToNextSlide();
+        }, SLIDESHOW_DELAY);
+        if (slideshowBtn) {
+          slideshowBtn.innerHTML = '⏸';
+          slideshowBtn.classList.add('playing');
+          slideshowBtn.title = 'Pause slideshow (Space)';
+        }
+      }
+
+      function stopSlideshow() {
+        if (slideshowTimer) {
+          clearInterval(slideshowTimer);
+          slideshowTimer = null;
+        }
+        slideshowPlaying = false;
+        if (slideshowBtn) {
+          slideshowBtn.innerHTML = '▶';
+          slideshowBtn.classList.remove('playing');
+          slideshowBtn.title = 'Play slideshow (Space)';
+        }
+      }
+
+      function toggleSlideshow() {
+        if (slideshowPlaying) {
+          stopSlideshow();
+        } else {
+          startSlideshow();
+        }
+      }
+
+      // ── EXIF panel ───────────────────────────────────────────────────────────
 
       var exifPanelVisible = false;
       var exifPanel = document.getElementById('lg-exif-panel');
 
-      // Format shutter speed - handles decimals and rational strings like "1/1000"
       function formatShutter(val) {
         if (!val) return null;
         if (typeof val === 'string' && val.indexOf('/') !== -1) {
@@ -131,42 +210,35 @@
         return '1/' + Math.round(1 / n) + 's';
       }
 
-      // Format aperture as f/x.x
       function formatAperture(val) {
         if (!val) return null;
         return 'f/' + parseFloat(val).toFixed(1).replace(/\.0$/, '');
       }
 
-      // Format focal length
       function formatFocal(val) {
         if (!val) return null;
         return parseFloat(val).toFixed(0) + 'mm';
       }
 
-      // Build and show/hide the EXIF panel for the current slide
       function updateExifPanel(index) {
         var items = document.querySelectorAll('#gallery > a');
         var el = items[index];
         if (!el) { exifPanel.innerHTML = ''; return; }
-
         var d = el.dataset;
         var make  = d.make  || '';
         var model = d.model || '';
         var camera = [make, model].filter(Boolean).join(' ') || null;
-        // Strip make prefix from model if it's already in there
         if (make && model && model.toLowerCase().startsWith(make.toLowerCase())) {
           camera = model;
         }
-
         var rows = [
-          ['Camera',        camera],
-          ['Lens',          d.lens || d.lensmodel || null],
-          ['Aperture',      formatAperture(d.fnumber)],
-          ['Shutter',       formatShutter(d.exposuretime)],
-          ['ISO',           d.isospeedratings ? 'ISO ' + d.isospeedratings : null],
-          ['Focal Length',  formatFocal(d.focallength)],
+          ['Camera',       camera],
+          ['Lens',         d.lens || d.lensmodel || null],
+          ['Aperture',     formatAperture(d.fnumber)],
+          ['Shutter',      formatShutter(d.exposuretime)],
+          ['ISO',          d.isospeedratings ? 'ISO ' + d.isospeedratings : null],
+          ['Focal Length', formatFocal(d.focallength)],
         ].filter(function(r) { return r[1]; });
-
         if (rows.length === 0) {
           exifPanel.innerHTML = '<span class="no-exif">No EXIF data</span>';
         } else {
@@ -178,23 +250,38 @@
 
       function toggleExifPanel() {
         exifPanelVisible = !exifPanelVisible;
-        if (exifPanelVisible) {
-          exifPanel.classList.add('visible');
-        } else {
-          exifPanel.classList.remove('visible');
-        }
+        exifPanel.classList.toggle('visible', exifPanelVisible);
       }
 
+      // ── Inject toolbar buttons on open ───────────────────────────────────────
 
-      // Inject button and panel on lgAfterOpen
       document.getElementById('gallery').addEventListener('lgAfterOpen', function() {
-        // Move panel inside lg-outer so it overlays correctly
         var lgOuter = document.querySelector('.lg-outer');
         if (lgOuter && !lgOuter.contains(exifPanel)) {
           lgOuter.appendChild(exifPanel);
         }
 
-        // Add button to toolbar if not already there
+        var toolbar = document.querySelector('.lg-toolbar');
+        var closeBtn = toolbar && toolbar.querySelector('.lg-close');
+
+        // Slideshow button
+        if (!document.getElementById('lg-slideshow-btn')) {
+          slideshowBtn = document.createElement('button');
+          slideshowBtn.id = 'lg-slideshow-btn';
+          slideshowBtn.className = 'lg-slideshow-btn lg-icon';
+          slideshowBtn.title = 'Play slideshow (Space)';
+          slideshowBtn.innerHTML = '▶';
+          slideshowBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleSlideshow();
+          });
+          if (closeBtn) toolbar.insertBefore(slideshowBtn, closeBtn);
+          else if (toolbar) toolbar.appendChild(slideshowBtn);
+        } else {
+          slideshowBtn = document.getElementById('lg-slideshow-btn');
+        }
+
+        // EXIF info button
         if (!document.getElementById('lg-exif-btn')) {
           var btn = document.createElement('button');
           btn.id = 'lg-exif-btn';
@@ -205,31 +292,62 @@
             e.stopPropagation();
             toggleExifPanel();
           });
-          // Append to toolbar — CSS order puts it right of zoom, left of close
-          var toolbar = document.querySelector('.lg-toolbar');
-          var closeBtn = toolbar && toolbar.querySelector('.lg-close');
-          if (closeBtn) {
-            toolbar.insertBefore(btn, closeBtn);
-          } else if (toolbar) {
-            toolbar.appendChild(btn);
-          }
+          if (closeBtn) toolbar.insertBefore(btn, closeBtn);
+          else if (toolbar) toolbar.appendChild(btn);
+        }
+
+        // If launched from grid play button, start immediately
+        if (window._startSlideshowOnOpen) {
+          window._startSlideshowOnOpen = false;
+          startSlideshow();
         }
 
         updateExifPanel(0);
       });
 
-
-
-      // Update EXIF panel when slide changes
+      // Update EXIF on slide change; reset slideshow timer so each photo gets full delay
       document.getElementById('gallery').addEventListener('lgAfterSlide', function(e) {
         updateExifPanel(e.detail.index);
-        // Keep panel visible but refresh content on slide change
+        if (slideshowPlaying) {
+          clearInterval(slideshowTimer);
+          slideshowTimer = setInterval(function() {
+            lgInstance.goToNextSlide();
+          }, SLIDESHOW_DELAY);
+        }
       });
 
-      // Hide panel when lightgallery closes
+      // Stop slideshow and hide panel when lightgallery closes
       document.getElementById('gallery').addEventListener('lgBeforeClose', function() {
+        stopSlideshow();
         exifPanelVisible = false;
         exifPanel.classList.remove('visible');
+      });
+
+      // Spacebar = play/pause; also stop slideshow if user manually navigates
+      document.addEventListener('keydown', function(e) {
+        if (!document.querySelector('.lg-outer')) return; // only when lg is open
+        if (e.code === 'Space') {
+          e.preventDefault();
+          toggleSlideshow();
+        }
+      });
+
+      // Manual prev/next stops the slideshow so user can browse freely
+      document.getElementById('gallery').addEventListener('lgBeforeSlide', function(e) {
+        // Only stop if the slide change wasn't triggered by our timer
+        // We detect this by checking if it's a user gesture (detail.fromTouch or controls)
+        if (slideshowPlaying && e.detail && e.detail.fromTouch) {
+          stopSlideshow();
+        }
+      });
+
+      // ── Grid play button ─────────────────────────────────────────────────────
+
+      document.getElementById('slideshow-launch').addEventListener('click', function() {
+        window._startSlideshowOnOpen = true;
+        // Open the first image in the gallery
+        var firstItem = document.querySelector('#gallery > a');
+        if (firstItem) firstItem.click();
       });
 
     </script>
@@ -245,11 +363,8 @@
         captions: false,
         border: 0,
         cssAnimation: true,
-
       });
-      console.log("started justifiedGallery")
     </script>
-
 
   </body>
 </html>
