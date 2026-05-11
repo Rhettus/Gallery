@@ -69,6 +69,16 @@
         }
         #lg-exif-panel .no-exif { color: #aaa; font-style: italic; }
 
+        /* ── Ken Burns effect ─────────────────────────────────────── */
+        @keyframes kenBurns {
+          from { transform: scale(1.12); }
+          to   { transform: scale(1.0);  }
+        }
+        .lg-current .lg-image.kb-active {
+          animation: kenBurns var(--kb-duration, 11s) ease-out forwards;
+          transform-origin: center center;
+        }
+
         /* ── Play button on thumbnail grid ───────────────────────── */
         #slideshow-launch {
           position: fixed;
@@ -161,6 +171,7 @@
         if (slideshowTimer) return;
         slideshowPlaying = true;
         setThumbstrip(false);
+        triggerKenBurns();
         slideshowTimer = setInterval(function() {
           lgInstance.goToNextSlide();
         }, SLIDESHOW_DELAY);
@@ -178,6 +189,9 @@
         }
         slideshowPlaying = false;
         setThumbstrip(true);
+        document.querySelectorAll('.lg-image').forEach(function(img) {
+          img.classList.remove('kb-active');
+        });
         if (slideshowBtn) {
           slideshowBtn.innerHTML = '▶';
           slideshowBtn.classList.remove('playing');
@@ -312,10 +326,27 @@
         updateExifPanel(0);
       });
 
+      // Trigger Ken Burns on the current slide image
+      function triggerKenBurns() {
+        // Remove from all slides first to reset animation
+        document.querySelectorAll('.lg-image').forEach(function(img) {
+          img.classList.remove('kb-active');
+        });
+        // Add to current slide image after a brief delay to ensure reset
+        setTimeout(function() {
+          var current = document.querySelector('.lg-current .lg-image');
+          if (current) {
+            current.style.setProperty('--kb-duration', (SLIDESHOW_DELAY / 1000 + 1) + 's');
+            current.classList.add('kb-active');
+          }
+        }, 50);
+      }
+
       // Update EXIF on slide change; reset slideshow timer so each photo gets full delay
       document.getElementById('gallery').addEventListener('lgAfterSlide', function(e) {
         updateExifPanel(e.detail.index);
         if (slideshowPlaying) {
+          triggerKenBurns();
           clearInterval(slideshowTimer);
           slideshowTimer = setInterval(function() {
             lgInstance.goToNextSlide();
