@@ -152,9 +152,15 @@
       var slideshowPlaying = false;
       var slideshowBtn = null;
 
+      function setThumbstrip(visible) {
+        var thumbs = document.querySelector('.lg-thumb-outer');
+        if (thumbs) thumbs.style.display = visible ? '' : 'none';
+      }
+
       function startSlideshow() {
         if (slideshowTimer) return;
         slideshowPlaying = true;
+        setThumbstrip(false);
         slideshowTimer = setInterval(function() {
           lgInstance.goToNextSlide();
         }, SLIDESHOW_DELAY);
@@ -171,6 +177,7 @@
           slideshowTimer = null;
         }
         slideshowPlaying = false;
+        setThumbstrip(true);
         if (slideshowBtn) {
           slideshowBtn.innerHTML = '▶';
           slideshowBtn.classList.remove('playing');
