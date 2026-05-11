@@ -35,8 +35,8 @@ jobs:
         run: |
           sudo chown -R $USER:$USER build_output
           mv build_output/index.html build_output/gallery.html
-                    find build_output -name "*.html" -not -name "index.html" -exec sed -i 's|href="index.html"|href="gallery.html"|g' {} ;
-          find build_output -name "*.html" -not -name "index.html" -exec sed -i 's|href="../index.html"|href="../gallery.html"|g' {} ;
+          find build_output -name "*.html" -not -name "index.html" -exec sed -i 's|href="index.html"|href="gallery.html"|g' {} \;
+          find build_output -name "*.html" -not -name "index.html" -exec sed -i 's|href="../index.html"|href="../gallery.html"|g' {} \;
           cp index.html build_output/index.html 
       - name: Package and upload artifact 📦
         uses: actions/upload-pages-artifact@v3
