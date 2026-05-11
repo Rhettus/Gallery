@@ -33,6 +33,7 @@ jobs:
           docker run -v "$(pwd):/work" ghcr.io/rhettus/thumbsup_website /bin/sh -c "cd /work && npm install moment && thumbsup --config /work/config.json && cp -pr /work/assets /work/build_output"
       - name: Install landing page 🏠
         run: |
+          sudo chown -R $USER:$USER build_output
           mv build_output/index.html build_output/gallery.html
           cp index.html build_output/index.html
       - name: Debug - Check for symlinks and hard links
