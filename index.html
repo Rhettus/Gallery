@@ -4,47 +4,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rhett.photo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Geist:wght@300;400&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    height: 100vh;
-    overflow: hidden;
-    background: #0a0a0a;
-    color: white;
-    font-family: 'Geist', sans-serif;
+  :root {
+    --white: #ffffff;
+    --off-white: #f5f4f0;
+    --black: #0a0a0a;
+    --grey-mid: #888;
+    --grey-light: #ccc;
+    --transition-slow: 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-med: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Geist', sans-serif;
+    background: var(--black);
+    color: var(--white);
+    cursor: default;
+  }
+
+  /* ── Slideshow ───────────────────────────────────────────── */
   #slideshow {
     position: fixed;
     inset: 0;
+    z-index: 0;
   }
 
   .slide {
     position: absolute;
     inset: 0;
+    background-size: cover;
+    background-position: center;
     opacity: 0;
-    transition: opacity 1s ease;
-  }
-
-  .slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 8s ease;
-  }
-
-  .slide.panorama img {
-    object-fit: contain;
-    background: black;
+    transition: opacity var(--transition-slow);
+    transform: scale(1.03);
+    transition: opacity var(--transition-slow), transform 8s ease;
   }
 
   .slide.active {
     opacity: 1;
-  }
-
-  .slide.active img {
     transform: scale(1);
   }
 
@@ -52,36 +55,222 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom,
-      rgba(0,0,0,0.35),
-      rgba(0,0,0,0.1) 40%,
-      rgba(0,0,0,0.1) 60%,
-      rgba(0,0,0,0.55));
+    background:
+      linear-gradient(to bottom,
+        rgba(0,0,0,0.35) 0%,
+        rgba(0,0,0,0.1) 40%,
+        rgba(0,0,0,0.1) 60%,
+        rgba(0,0,0,0.55) 100%);
   }
 
+  /* ── Layout ──────────────────────────────────────────────── */
   #ui {
     position: fixed;
     inset: 0;
+    z-index: 10;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 48px;
-    z-index: 10;
+    padding: 48px 56px;
   }
 
-  .hero {
-    text-align: center;
+  /* ── Header ──────────────────────────────────────────────── */
+  header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    opacity: 0;
+    transform: translateY(-12px);
+    animation: fadeUp 1s 0.3s forwards;
   }
 
-  .cta-btn {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 12px 28px;
-    border: 1px solid rgba(255,255,255,0.4);
+  .wordmark {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: clamp(22px, 3vw, 32px);
+    letter-spacing: 0.04em;
+    color: var(--white);
     text-decoration: none;
-    color: white;
   }
 
+  .wordmark em {
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  .slide-counter {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+    padding-top: 6px;
+    text-transform: uppercase;
+  }
+
+  /* ── Center hero text ────────────────────────────────────── */
+  .hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 20px;
+    opacity: 0;
+    animation: fadeUp 1s 0.7s forwards;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: clamp(42px, 7vw, 88px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--white);
+  }
+
+  .hero-title em {
+    font-style: italic;
+  }
+
+  .hero-sub {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.04em;
+    max-width: 380px;
+    line-height: 1.7;
+  }
+
+  /* ── CTA ─────────────────────────────────────────────────── */
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 13px 32px;
+    border: 1px solid rgba(255,255,255,0.4);
+    color: var(--white);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 300;
+    font-family: 'Geist', sans-serif;
+    transition: background var(--transition-med), border-color var(--transition-med);
+    backdrop-filter: blur(6px);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .cta-btn:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.7);
+  }
+
+  .cta-arrow {
+    font-size: 16px;
+    transition: transform var(--transition-med);
+  }
+
+  .cta-btn:hover .cta-arrow { transform: translateX(4px); }
+
+  /* ── Bottom bar ──────────────────────────────────────────── */
+  footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    opacity: 0;
+    animation: fadeUp 1s 1.1s forwards;
+  }
+
+  /* Album strip */
+  .album-strip {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .album-thumb {
+    width: 64px;
+    height: 42px;
+    background-size: 115%;
+    background-position: center;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.4s, transform 0.4s;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .album-thumb:hover,
+  .album-thumb.active {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+
+  .album-thumb .thumb-label {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transition: opacity 0.3s;
+    text-transform: uppercase;
+  }
+
+  .album-thumb:hover .thumb-label,
+  .album-thumb.active .thumb-label {
+    opacity: 1;
+  }
+
+  /* Progress dots */
+  .progress-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding-bottom: 4px;
+  }
+
+  .dot {
+    width: 20px;
+    height: 1px;
+    background: rgba(255,255,255,0.3);
+    transition: background 0.5s, width 0.5s;
+    cursor: pointer;
+  }
+
+  .dot.active {
+    background: var(--white);
+    width: 32px;
+  }
+
+  /* ── Animations ──────────────────────────────────────────── */
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Mobile ──────────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    #ui { padding: 32px 24px; }
+    .album-strip { gap: 6px; }
+    .album-thumb { width: 48px; height: 32px; }
+    .hero-sub { font-size: 13px; }
+  }
 </style>
 </head>
 <body>
@@ -89,58 +278,119 @@
 <div id="slideshow"></div>
 
 <div id="ui">
+  <header>
+    <a class="wordmark" href="#">Rhett.photo</a>
+    <span class="slide-counter" id="counter">01</span>
+  </header>
+
   <div class="hero">
-    <p>Wildlife, travel, and the quiet world in between.</p>
-    <a class="cta-btn" href="gallery.html">Enter Gallery →</a>
+    <p class="hero-sub">Wildlife, travel, and the quiet world in between.</p>
+    <a class="cta-btn" href="gallery.html">
+      Enter gallery <span class="cta-arrow">→</span>
+    </a>
   </div>
+
+  <footer>
+    <div class="album-strip" id="albumStrip"></div>
+    <div class="progress-dots" id="dots"></div>
+  </footer>
 </div>
 
 <script>
-const albums = [
-  { img: "media/small/Wildlife/cover.jpg" },
-  { img: "media/small/Color/cover.jpg" },
-  { img: "media/small/Panoramas/cover.jpg" },
-  { img: "media/small/Travel Adventures/cover.jpg" }
-];
+  /*
+    CONFIGURE YOUR ALBUMS HERE
+    ─────────────────────────────────────────────────────────────
+    Add one entry per album you want to feature.
+    "img"  → path to the album cover image (relative to this file)
+    "name" → album display name
+    "href" → link to that album in the gallery
 
-const slideshow = document.getElementById('slideshow');
-let current = 0;
+    Example path if your gallery output is in build_output/:
+  */
+  const albums = [
+    {
+      img:  "media/large/Birds%20of%20Marin%20County/cover.jpg",
+      name: "Birds of Marin County",
+      href: "Birds-of-Marin-County.html"
+    },
+    {
+      img:  "media/large/B%26W%20Tools%20and%20Workshops/cover.jpg",
+      name: "Tools and Workshops",
+      href: "BandW-Tools-and-Workshops.html"
+    },
+    {
+      img:  "media/large/Panoramas/cover.jpg",
+      name: "Panoramas",
+      href: "Panoramas.html"
+    },
+    {
+      img:  "media/large/On My Way/cover.jpg",
+      name: "On My Way",
+      href: "On-My-Way.html"
+    },
+  ];
 
-const slides = albums.map((a) => {
-  const slide = document.createElement('div');
-  slide.className = 'slide';
+  /* ── Build DOM ───────────────────────────────────────────── */
+  const slideshow   = document.getElementById('slideshow');
+  const strip       = document.getElementById('albumStrip');
+  const dotsEl      = document.getElementById('dots');
+  const counterEl   = document.getElementById('counter');
 
-  const img = document.createElement('img');
-  img.src = a.img;
+  let current = 0;
+  let timer;
 
-  img.onload = () => {
-    const ratio = img.naturalWidth / img.naturalHeight;
+  const slides = albums.map((a, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+    slide.style.backgroundImage = `url('${a.img}')`;
+    slideshow.appendChild(slide);
 
-    // panorama detection (wide images)
-    if (ratio > 2) {
-      slide.classList.add('panorama');
-    }
-  };
+    const thumb = document.createElement('div');
+    thumb.className = 'album-thumb';
+    thumb.style.backgroundImage = `url('${a.img}')`;
+    thumb.title = a.name;
+    const label = document.createElement('span');
+    label.className = 'thumb-label';
+    label.textContent = a.name;
+    thumb.appendChild(label);
+    thumb.addEventListener('click', () => { goTo(i); resetTimer(); });
+    strip.appendChild(thumb);
 
-  slide.appendChild(img);
-  slideshow.appendChild(slide);
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.addEventListener('click', () => { goTo(i); resetTimer(); });
+    dotsEl.appendChild(dot);
 
-  return slide;
-});
+    return { slide, thumb, dot };
+  });
 
-function goTo(n) {
-  slides[current].classList.remove('active');
-  current = (n + slides.length) % slides.length;
-  slides[current].classList.add('active');
-}
+  function goTo(n) {
+    slides[current].slide.classList.remove('active');
+    slides[current].thumb.classList.remove('active');
+    slides[current].dot.classList.remove('active');
+    current = (n + albums.length) % albums.length;
+    slides[current].slide.classList.add('active');
+    slides[current].thumb.classList.add('active');
+    slides[current].dot.classList.add('active');
+    counterEl.textContent = String(current + 1).padStart(2, '0');
+  }
 
-function next() {
-  goTo(current + 1);
-}
+  function next() { goTo(current + 1); }
 
-setInterval(next, 5000);
-goTo(0);
+  function resetTimer() {
+    clearInterval(timer);
+    timer = setInterval(next, 5000);
+  }
+
+  /* Start */
+  goTo(0);
+  resetTimer();
+
+  /* Keyboard navigation */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { next(); resetTimer(); }
+    if (e.key === 'ArrowLeft')  { goTo(current - 1); resetTimer(); }
+  });
 </script>
-
 </body>
 </html>
